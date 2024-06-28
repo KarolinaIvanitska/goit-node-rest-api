@@ -16,7 +16,7 @@ const getAllContacts = async (req, res, next) => {
 const getOneContact = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const result = await contactsService.getContactById(id);
+    const result = await contactsService.getContactById({ _id: id });
 
     if (!result) {
       throw HttpError(404, `Movie with id=${id} not found`);
@@ -30,7 +30,7 @@ const getOneContact = async (req, res, next) => {
 const deleteContact = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const result = await contactsService.removeContact(id);
+    const result = await contactsService.removeContact({ _id: id });
     if (!result) {
       throw HttpError(404, `Movie with id=${id} not found`);
     }
@@ -60,10 +60,25 @@ const updateContact = async (req, res, next) => {
       throw HttpError(400, error.message);
     }
     const { id } = req.params;
-    const result = await contactsService.updateContact(id, req.body);
+    const result = await contactsService.updateContact({ _id: id }, req.body);
     if (!result) {
       throw HttpError(404, `Movie with id=${id} not found`);
     }
+  } catch (error) {
+    next(error);
+  }
+};
+export const updateStatusContact = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await contactsService.updateContactByStatus(
+      { _id: id },
+      req.body
+    );
+    if (!result) {
+      throw HttpError(404);
+    }
+    res.status(200).json(result);
   } catch (error) {
     next(error);
   }
@@ -75,4 +90,5 @@ export default {
   deleteContact,
   createContact,
   updateContact,
+  updateStatusContact,
 };
