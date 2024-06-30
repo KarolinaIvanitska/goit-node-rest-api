@@ -4,9 +4,12 @@ import {
   createContactSchema,
   updateContactSchema,
 } from "../schemas/contactsSchemas.js";
+import getFilterWithIdOwner from "../helpers/getFilterwithIdOwner.js";
 const getAllContacts = async (req, res, next) => {
   try {
-    const result = await contactsService.listContacts();
+    const { _id: owner } = req.user;
+    const filter = { owner };
+    const result = await contactsService.listContacts({ filter });
     res.json(result);
   } catch (error) {
     next(error);
@@ -15,8 +18,8 @@ const getAllContacts = async (req, res, next) => {
 
 const getOneContact = async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const result = await contactsService.getContactById({ _id: id });
+    const filter = getFilterWithIdOwner(req);
+    const result = await contactsService.getContactById(filter);
 
     if (!result) {
       throw HttpError(404, `Movie with id=${id} not found`);
@@ -29,8 +32,8 @@ const getOneContact = async (req, res, next) => {
 
 const deleteContact = async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const result = await contactsService.removeContact({ _id: id });
+    const filter = getFilterWithIdOwner(req);
+    const result = await contactsService.removeContact(filter);
     if (!result) {
       throw HttpError(404, `Movie with id=${id} not found`);
     }
@@ -42,11 +45,12 @@ const deleteContact = async (req, res, next) => {
 
 const createContact = async (req, res, next) => {
   try {
+    const { _id: owner } = req.user;
     const { error } = createContactSchema.validate(req.body);
     if (error) {
       throw HttpError(400, error.message);
     }
-    const result = await contactsService.addContact(req.body);
+    const result = await contactsService.addContact(...req.body, owner);
     res.status(201).json(result);
   } catch (error) {
     next(error);
@@ -59,8 +63,8 @@ const updateContact = async (req, res, next) => {
     if (error) {
       throw HttpError(400, error.message);
     }
-    const { id } = req.params;
-    const result = await contactsService.updateContact({ _id: id }, req.body);
+    const filter = getFilterWithIdOwner(req);
+    const result = await contactsService.updateContact(filter, req.body);
     if (!result) {
       throw HttpError(404, `Movie with id=${id} not found`);
     }

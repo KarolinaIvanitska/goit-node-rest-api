@@ -3,7 +3,7 @@ import * as authServices from "../services/authServices.js";
 import bcrypt from "bcrypt";
 import { createToken } from "../helpers/jwt.js";
 
-const signup = async (req, res, next) => {
+const signup = async (req, res) => {
   const { email, password } = req.body;
   const user = await authServices.findUser({ email });
   if (user) {
@@ -20,7 +20,7 @@ const signup = async (req, res, next) => {
     .json({ email: newUser.email, subscription: newUser.subscription });
 };
 
-const login = async (req, res, next) => {
+const login = async (req, res) => {
   const { email, password } = req.body;
   const user = await authServices.findUser({ email });
   if (!user) {
@@ -34,7 +34,19 @@ const login = async (req, res, next) => {
   const payload = { id };
 
   const token = createToken(payload);
+  await authServices.updateUser({ _id: id }, { token });
   res.json({ token });
 };
 
-export default { signup, login };
+const getCurrent = async (req, res) => {
+  const { email, subscription } = req.user;
+  res.json({ email, subscription });
+};
+
+const logout = async (req, res) => {
+  const { _id } = req.user;
+  await authServices.updateUser({ _id }, { token: "" });
+  res.json({ message: "Logout success" });
+};
+
+export default { signup, login, getCurrent, logout };
