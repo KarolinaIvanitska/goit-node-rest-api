@@ -15,7 +15,7 @@ authRouter.post(
 );
 
 authRouter.post(
-  "login",
+  "/login",
   isEmptyBody,
   validateBody(authSignInSchema),
   authControllers.login

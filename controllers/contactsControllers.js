@@ -5,6 +5,12 @@ import {
   updateContactSchema,
 } from "../schemas/contactsSchemas.js";
 import getFilterWithIdOwner from "../helpers/getFilterwithIdOwner.js";
+import fs from "fs/promises";
+import path from "path";
+
+const avatarsDir = path.resolve("public", "avatars");
+console.log(avatarsDir);
+
 const getAllContacts = async (req, res, next) => {
   try {
     const { _id: owner } = req.user;
@@ -46,6 +52,7 @@ const deleteContact = async (req, res, next) => {
 const createContact = async (req, res, next) => {
   try {
     const { _id: owner } = req.user;
+    const { path: oldPath, filename } = req.file;
     const { error } = createContactSchema.validate(req.body);
     if (error) {
       throw HttpError(400, error.message);
