@@ -2,7 +2,11 @@ import HttpError from "../helpers/HttpError.js";
 import * as authServices from "../services/authServices.js";
 import bcrypt from "bcrypt";
 import { createToken } from "../helpers/jwt.js";
+import gravatar from "gravatar";
+import path from "path";
+import { fstat } from "fs";
 
+const avatarPath = path.resolve("public", "avatars");
 const signup = async (req, res) => {
   const { email, password } = req.body;
   const user = await authServices.findUser({ email });
@@ -10,10 +14,11 @@ const signup = async (req, res) => {
     throw HttpError(409, "Email in use");
   }
   const hashPassword = await bcrypt.hash(password, 10);
-
+  const avatarURL = gravatar.url(email);
   const newUser = await authServices.signup({
     ...req.body,
     password: hashPassword,
+    avatarURL,
   });
   res
     .status(201)
@@ -39,8 +44,8 @@ const login = async (req, res) => {
 };
 
 const getCurrent = async (req, res) => {
-  const { email, subscription } = req.user;
-  res.json({ email, subscription });
+  const { email, subscription, avatarURL } = req.user;
+  res.json({ email, subscription, avatarURL });
 };
 
 const logout = async (req, res) => {
@@ -49,4 +54,14 @@ const logout = async (req, res) => {
   res.json({ message: "Logout success" });
 };
 
-export default { signup, login, getCurrent, logout };
+const updateAvatar = async (req, res) => {
+  const { _id } = req.user;
+  const { path: oldPath, filename } = req.file;
+  const newPath = path.join(avatarsPath, filename);
+  await fs.rename(oldPath, newPath);
+  const avatarURL = path.join("avatars", filename);
+  await authServices.setAvatar(_id, avatarURL);
+  res.json({ avatarURL });
+};
+
+export default { signup, login, getCurrent, logout, updateAvatar };

@@ -1,6 +1,7 @@
 import multer from "multer";
 import path from "path";
 import HttpError from "../helpers/HttpError.js";
+import multer from "multer";
 
 const destination = path.resolve("temp");
 
@@ -18,17 +19,17 @@ const limits = {
 };
 
 const filter = (req, file, callback) => {
-  const ext = file.originalname.split(".").pop();
-  if (ext === "exe") {
+  const extension = file.originalname.split(".").pop();
+  if (extension === "exe") {
     return callback(HttpError(400, "Not allowed"));
   }
   callback(null, true);
 };
 
-const upload = {
+const upload = multer({
   storage,
   limits,
   filter,
-};
+});
 
 export default upload;

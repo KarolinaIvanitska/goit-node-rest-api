@@ -5,11 +5,6 @@ import {
   updateContactSchema,
 } from "../schemas/contactsSchemas.js";
 import getFilterWithIdOwner from "../helpers/getFilterwithIdOwner.js";
-import fs from "fs/promises";
-import path from "path";
-
-const avatarsDir = path.resolve("public", "avatars");
-console.log(avatarsDir);
 
 const getAllContacts = async (req, res, next) => {
   try {
