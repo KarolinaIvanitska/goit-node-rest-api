@@ -2,6 +2,8 @@ import express from "express";
 import morgan from "morgan";
 import cors from "cors";
 import mongoose from "mongoose";
+import nodemailer from "nodemailer";
+import "dotenv/config";
 
 import contactsRouter from "./routes/contactsRouter.js";
 import authRouter from "./routes/authRouter.js";
